@@ -1,0 +1,5 @@
+bin/
+obj/
+
+# valós adatbázis-kapcsolati adatokat tartalmaz, ne kerüljön verziókezelésbe
+#iskolaraktarBackend/dbsettings.json
