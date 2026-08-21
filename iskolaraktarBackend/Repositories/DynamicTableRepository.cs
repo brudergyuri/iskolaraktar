@@ -6,6 +6,10 @@ using MySqlConnector;
 
 namespace iskolaraktarBackend.Repositories;
 
+/// <summary>
+/// Az <see cref="IDynamicTableRepository"/> MySQL megvalósítása. Mivel a táblák/oszlopok futásidőben jönnek létre,
+/// minden nevet az INFORMATION_SCHEMA-ból ellenőriz le, mielőtt SQL string-be interpolálná (SQL injection elleni védelem).
+/// </summary>
 public class DynamicTableRepository : IDynamicTableRepository
 {
     private readonly IDbConnectionFactory _connectionFactory;
@@ -15,6 +19,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         _connectionFactory = connectionFactory;
     }
 
+    /// <summary>Az aktuális adatbázis összes táblájának neve, név szerint rendezve.</summary>
     public async Task<IReadOnlyList<string>> GetTableNamesAsync(CancellationToken cancellationToken = default)
     {
         await using var connection = await _connectionFactory.CreateOpenConnectionAsync(cancellationToken);
@@ -75,6 +80,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    /// <summary>Új oszlop hozzáadása egy már létező táblához; a foglalt (fix) neveket és a már létező oszlopokat elutasítja.</summary>
     public async Task AddColumnAsync(string tableName, ColumnDefinition column, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
@@ -100,6 +106,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    /// <summary>Tábla teljes törlése (DROP TABLE).</summary>
     public async Task DropTableAsync(string tableName, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
@@ -112,6 +119,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    /// <summary>A tábla összes sorát betölti (SELECT *), oszlopnév -> érték szótárak listájaként.</summary>
     public async Task<IReadOnlyList<Dictionary<string, object?>>> GetAllAsync(string tableName, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
@@ -132,6 +140,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         return rows;
     }
 
+    /// <summary>Egy sor lekérése a tábla primáry key oszlopa alapján.</summary>
     public async Task<Dictionary<string, object?>?> GetByIdAsync(string tableName, object id, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
@@ -147,6 +156,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         return await reader.ReadAsync(cancellationToken) ? ReadRow(reader) : null;
     }
 
+    /// <summary>Új sor beszúrása; a QrGuid mezőt mindig a szerver generálja újra, a kliens által küldött érték elveszik.</summary>
     public async Task<object> InsertAsync(string tableName, Dictionary<string, object?> values, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
@@ -181,6 +191,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         return newId ?? throw new InvalidOperationException("Nem sikerült beszúrni a rekordot.");
     }
 
+    /// <summary>Egy sor megadott mezőinek frissítése a primáry key alapján; a QrGuid itt is figyelmen kívül marad.</summary>
     public async Task<bool> UpdateAsync(string tableName, object id, Dictionary<string, object?> values, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
@@ -212,6 +223,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         return affectedRows > 0;
     }
 
+    /// <summary>Egy sor törlése a primáry key alapján.</summary>
     public async Task<bool> DeleteAsync(string tableName, object id, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
@@ -227,6 +239,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         return affectedRows > 0;
     }
 
+    /// <summary>QR-kód szkennelés: megkeresi a sort a QrGuid alapján, beállítja a LastInventoryDate-et a szerver UTC idejére, majd visszaadja a frissített sort.</summary>
     public async Task<Dictionary<string, object?>?> ScanAsync(string tableName, string qrGuid, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
@@ -277,6 +290,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         return result;
     }
 
+    // A JSON body-ból érkező JsonElement-eket alakítja natív .NET / DB-kompatibilis típusokra
     private static object? ConvertValue(object? value) => value switch
     {
         null => DBNull.Value,
@@ -288,6 +302,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         _ => value,
     };
 
+    // Az aktuális MySqlDataReader sorát Dictionary-vé alakítja (oszlopnév -> érték, DBNull helyett null-lal)
     private static Dictionary<string, object?> ReadRow(MySqlDataReader reader)
     {
         var row = new Dictionary<string, object?>();
@@ -299,6 +314,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         return row;
     }
 
+    // Létezik-e már ilyen nevű tábla az adatbázisban (CREATE TABLE előtti ütközés-ellenőrzéshez)
     private static async Task<bool> TableExistsAsync(MySqlConnection connection, string tableName, CancellationToken cancellationToken)
     {
         await using var command = new MySqlCommand(
@@ -309,6 +325,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         return count > 0;
     }
 
+    // Minden más művelet (ALTER/SELECT/UPDATE/DELETE) előtt ellenőrzi, hogy a hivatkozott tábla valóban létezik
     private static async Task EnsureTableExistsAsync(MySqlConnection connection, string tableName, CancellationToken cancellationToken)
     {
         if (!await TableExistsAsync(connection, tableName, cancellationToken))
@@ -317,6 +334,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         }
     }
 
+    // A tábla oszlopait olvassa ki az INFORMATION_SCHEMA-ból (típus, nullable, elsődleges kulcs-e); ez a forrása minden oszlopnév-ellenőrzésnek
     private static async Task<IReadOnlyList<ColumnInfo>> GetColumnsAsync(MySqlConnection connection, string tableName, CancellationToken cancellationToken)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
@@ -354,6 +372,7 @@ public class DynamicTableRepository : IDynamicTableRepository
         return columns;
     }
 
+    // A tábla elsődleges kulcs oszlopának nevét adja vissza (Id-nak kellene lennie, de nem hardcode-olt)
     private static async Task<string> GetPrimaryKeyColumnAsync(MySqlConnection connection, string tableName, CancellationToken cancellationToken)
     {
         var columns = await GetColumnsAsync(connection, tableName, cancellationToken);

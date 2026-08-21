@@ -3,6 +3,10 @@ using iskolaraktarBackend.Models;
 
 namespace iskolaraktarBackend.Data;
 
+/// <summary>
+/// Az <see cref="IAuthConfigService"/> megvalósítása: az auth.json-t a memóriában tartja (_config mező),
+/// minden módosító művelet egy szálon (SemaphoreSlim) fut le, és a változtatás után azonnal visszaír a lemezre.
+/// </summary>
 public class AuthConfigService : IAuthConfigService
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -12,16 +16,20 @@ public class AuthConfigService : IAuthConfigService
     };
 
     private readonly string _filePath;
+    // Biztosítja, hogy párhuzamos kérések esetén se szálljon össze a memóriabeli állapot és a fájlírás
     private readonly SemaphoreSlim _lock = new(1, 1);
+    // Null, amíg a rendszer nincs inicializálva (még nem létezik auth.json)
     private AuthConfig? _config;
 
     public AuthConfigService(IConfiguration configuration, IHostEnvironment environment)
     {
+        // Alapértelmezésben a főkönyvtárban (a futtatható mellé) kerul, de felüldefiniálható konfigurációval
         var configuredPath = configuration["AuthConfigPath"];
         _filePath = string.IsNullOrWhiteSpace(configuredPath)
             ? Path.Combine(environment.ContentRootPath, "auth.json")
             : configuredPath;
 
+        // Ha már létezik a fájl, betölti a memóriába (így a request-enkénti feldolgozás nem fájlt olvas)
         if (File.Exists(_filePath))
         {
             var json = File.ReadAllText(_filePath);
@@ -48,6 +56,7 @@ public class AuthConfigService : IAuthConfigService
                 throw new InvalidOperationException("A rendszer már inicializálva van.");
             }
 
+            // Az elsőként létrehozott felhasználó mindig admin, teljes jogkörrel minden táblára ("*")
             var adminUser = new AuthUser
             {
                 Username = username,
@@ -95,6 +104,7 @@ public class AuthConfigService : IAuthConfigService
                 Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
                 IsAdmin = isAdmin,
+                // Új felhasználó alapértelmezésben egyetlen táblához sem fér hozzá, a jogokat külön kell beállítani
                 Permissions = new Dictionary<string, AccessLevel>(StringComparer.OrdinalIgnoreCase),
             };
             config.Users.Add(user);
@@ -147,6 +157,7 @@ public class AuthConfigService : IAuthConfigService
                 return null;
             }
 
+            // Felülírja, ha már volt beállítva jog a táblához, különben újat vesz fel
             user.Permissions[tableName] = access;
             await SaveAsync(cancellationToken);
             return AuthUserInfo.FromUser(user);
@@ -164,6 +175,7 @@ public class AuthConfigService : IAuthConfigService
         {
             var config = RequireConfig();
             var user = config.Users.FirstOrDefault(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase));
+            // BCrypt.Verify összeveti a sima jelszót a tárolt hash-sel (a só a hash része, nem kell külön tárolni)
             if (user is null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
                 return null;
@@ -178,8 +190,10 @@ public class AuthConfigService : IAuthConfigService
     }
 
     private AuthConfig RequireConfig() =>
+        // Minden műveletnek hívnia kell, mert setup nélkül értelmetlen felhasználót kezelni
         _config ?? throw new InvalidOperationException("A rendszer még nincs inicializálva.");
 
+    /// <summary>A teljes memóriabeli konfigurációt (felül)írja az auth.json fájlba, formázott JSON-ként.</summary>
     private async Task SaveAsync(CancellationToken cancellationToken)
     {
         var json = JsonSerializer.Serialize(_config, JsonOptions);
@@ -194,6 +208,7 @@ public class AuthConfigService : IAuthConfigService
         }
     }
 
+    // Minimális jelszóhossz-ellenőrzés; a tényleges biztonságot a BCrypt hash adja
     private static void ValidatePassword(string password)
     {
         if (string.IsNullOrWhiteSpace(password) || password.Length < 4)

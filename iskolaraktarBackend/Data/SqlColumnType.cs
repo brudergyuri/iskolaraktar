@@ -13,6 +13,7 @@ public static partial class SqlColumnType
         RegexOptions.IgnoreCase)]
     private static partial Regex ValidTypePattern();
 
+    /// <summary>Eldobja a kivételt, ha a megadott típus nincs benne a zárt fehérlistában (véd a tetszőleges DDL befecskendezése ellen).</summary>
     public static void EnsureValid(string sqlType)
     {
         if (string.IsNullOrWhiteSpace(sqlType) || !ValidTypePattern().IsMatch(sqlType.Trim()))

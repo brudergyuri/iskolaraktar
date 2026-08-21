@@ -6,8 +6,11 @@ namespace iskolaraktarBackend.Models;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AccessLevel
 {
+    /// <summary>Nincs hozzáférés: a tábla adatai nem láthatók/módosíthatók.</summary>
     None,
+    /// <summary>Csak olvasási jog: a tábla adatai lekérdezhetők, de nem módosíthatók.</summary>
     Read,
+    /// <summary>Teljes jogkör: olvasás, írás (létrehozás/módosítás) és törlés is engedélyezett.</summary>
     ReadWrite,
 }
 
@@ -15,7 +18,9 @@ public enum AccessLevel
 public class AuthUser
 {
     public string Username { get; set; } = string.Empty;
+    /// <summary>BCrypt-tel generált hash (a só a hash része), sosem sima szöveges jelszó.</summary>
     public string PasswordHash { get; set; } = string.Empty;
+    /// <summary>Admin felhasználó minden táblához automatikusan teljes jogkörrel rendelkezik, a Permissions listától függetlenül.</summary>
     public bool IsAdmin { get; set; }
 
     /// <summary>Táblanév -> hozzáférési szint. A "*" kulcs az összes, itt fel nem sorolt táblára vonatkozó alapértelmezés.</summary>
@@ -40,10 +45,12 @@ public class AuthUserInfo
 /// <summary>Az auth.json fájl teljes tartalma.</summary>
 public class AuthConfig
 {
+    /// <summary>Az iskola/intézmény adatbázisának neve, amit az első indításos setup során ad meg a felhasználó.</summary>
     public string DatabaseName { get; set; } = string.Empty;
     public List<AuthUser> Users { get; set; } = new();
 }
 
+/// <summary>Első indításos beállítás (POST /api/auth/setup) törzse: ekkor jön létre az admin felhasználó és maga az auth.json.</summary>
 public class SetupRequest
 {
     public string Username { get; set; } = string.Empty;
@@ -51,12 +58,14 @@ public class SetupRequest
     public string DatabaseName { get; set; } = string.Empty;
 }
 
+/// <summary>Bejelentkezés (POST /api/auth/login) törzse.</summary>
 public class LoginRequest
 {
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }
 
+/// <summary>Új felhasználó létrehozása (POST /api/auth/users) törzse.</summary>
 public class CreateUserRequest
 {
     public string Username { get; set; } = string.Empty;
@@ -64,6 +73,7 @@ public class CreateUserRequest
     public bool IsAdmin { get; set; }
 }
 
+/// <summary>Egy felhasználó tábla-hozzáférésének beállítása (PUT /api/auth/users/{username}/permissions/{tableName}) törzse.</summary>
 public class SetPermissionRequest
 {
     public AccessLevel Access { get; set; }

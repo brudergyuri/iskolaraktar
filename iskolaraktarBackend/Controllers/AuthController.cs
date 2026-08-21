@@ -23,6 +23,7 @@ public class AuthController : ControllerBase
         return Ok(new { initialized = _authConfigService.IsInitialized });
     }
 
+    /// <summary>Első indításos beállítás: létrehozza az admin felhasználót és az auth.json-t. Csak akkor hívható, ha még nincs inicializálva (különben 409).</summary>
     [HttpPost("setup")]
     public async Task<IActionResult> Setup(SetupRequest request, CancellationToken cancellationToken)
     {
@@ -46,6 +47,7 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>Bejelentkezés felhasználónév+jelszóval; siker esetén a felhasználó adatait (jogosultságokkal együtt), sikertelen esetén 401-et ad vissza.</summary>
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
     {
@@ -58,6 +60,7 @@ public class AuthController : ControllerBase
         return user is null ? Unauthorized() : Ok(user);
     }
 
+    /// <summary>Az összes felhasználó listája (jelszóhash nélkül), admin felületnek való.</summary>
     [HttpGet("users")]
     public IActionResult GetUsers()
     {
@@ -69,6 +72,7 @@ public class AuthController : ControllerBase
         return Ok(_authConfigService.GetUsers());
     }
 
+    /// <summary>Új felhasználó létrehozása; a jelszó BCrypt-tel kerül hash-elésre, majd az auth.json azonnal frissül.</summary>
     [HttpPost("users")]
     public async Task<IActionResult> CreateUser(CreateUserRequest request, CancellationToken cancellationToken)
     {
@@ -92,6 +96,7 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>Felhasználó törlése; az auth.json azonnal frissül a memóriában és a lemezen is.</summary>
     [HttpDelete("users/{username}")]
     public async Task<IActionResult> DeleteUser(string username, CancellationToken cancellationToken)
     {

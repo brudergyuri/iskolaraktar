@@ -15,6 +15,7 @@ public class DataController : ControllerBase
         _repository = repository;
     }
 
+    /// <summary>Egy dinamikus tábla összes sorát adja vissza JSON listaként (SELECT *).</summary>
     [HttpGet]
     public async Task<IActionResult> GetAll(string tableName, CancellationToken cancellationToken)
     {
@@ -32,6 +33,7 @@ public class DataController : ControllerBase
         }
     }
 
+    /// <summary>Egy sort ad vissza a primáry key (többnyire Id) alapján, vagy 404-et, ha nem létezik.</summary>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string tableName, int id, CancellationToken cancellationToken)
     {
@@ -54,6 +56,7 @@ public class DataController : ControllerBase
         }
     }
 
+    /// <summary>Új eszköz (sor) felvétele a táblába; a QrGuid-ot mindig a szerver generálja, kliens által küldött érték figyelmen kívül marad.</summary>
     [HttpPost]
     public async Task<IActionResult> Create(string tableName, [FromBody] Dictionary<string, object?> values, CancellationToken cancellationToken)
     {
@@ -72,6 +75,7 @@ public class DataController : ControllerBase
         }
     }
 
+    /// <summary>Egy meglévő sor mezőinek frissítése a megadott mezőkkel (a QrGuid itt sem módosítható).</summary>
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string tableName, int id, [FromBody] Dictionary<string, object?> values, CancellationToken cancellationToken)
     {
@@ -94,6 +98,7 @@ public class DataController : ControllerBase
         }
     }
 
+    /// <summary>Egy eszköz (sor) törlése a primáry key alapján.</summary>
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string tableName, int id, CancellationToken cancellationToken)
     {
