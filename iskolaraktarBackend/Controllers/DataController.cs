@@ -115,4 +115,23 @@ public class DataController : ControllerBase
             return Conflict(ex.Message);
         }
     }
+
+    /// <summary>QR-kód beolvasásakor hívandó: a QrGuid alapján frissíti a legutóbbi leltározás dátumát a szerver idejére.</summary>
+    [HttpPost("scan/{qrGuid}")]
+    public async Task<IActionResult> Scan(string tableName, string qrGuid, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var row = await _repository.ScanAsync(tableName, qrGuid, cancellationToken);
+            return row is null ? NotFound() : Ok(row);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
 }

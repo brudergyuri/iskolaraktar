@@ -19,4 +19,7 @@ public interface IDynamicTableRepository
     Task<object> InsertAsync(string tableName, Dictionary<string, object?> values, CancellationToken cancellationToken = default);
     Task<bool> UpdateAsync(string tableName, object id, Dictionary<string, object?> values, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(string tableName, object id, CancellationToken cancellationToken = default);
+
+    /// <summary>QR-kód beolvasáskor a QrGuid alapján beazonosítja az eszközt, és a szerver idejére frissíti a legutóbbi leltározás dátumát.</summary>
+    Task<Dictionary<string, object?>?> ScanAsync(string tableName, string qrGuid, CancellationToken cancellationToken = default);
 }

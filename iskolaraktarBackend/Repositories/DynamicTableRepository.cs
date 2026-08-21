@@ -49,12 +49,13 @@ public class DynamicTableRepository : IDynamicTableRepository
             throw new InvalidOperationException($"A(z) '{table.Name}' tábla már létezik.");
         }
 
-        // Id, AssetCode (eszközszám) és QrGuid minden táblában fixen létrejön, ezekre épül a QR-kódos azonosítás.
+        // Id, AssetCode (eszközszám), QrGuid és LastInventoryDate minden táblában fixen létrejön, ezekre épül a QR-kódos azonosítás és leltározás.
         var columnClauses = new List<string>
         {
             "`Id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY",
             "`AssetCode` VARCHAR(64) NOT NULL UNIQUE",
             "`QrGuid` CHAR(36) NOT NULL UNIQUE",
+            "`LastInventoryDate` DATETIME NULL",
         };
         foreach (var column in table.Columns)
         {
@@ -224,6 +225,40 @@ public class DynamicTableRepository : IDynamicTableRepository
 
         var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
         return affectedRows > 0;
+    }
+
+    public async Task<Dictionary<string, object?>?> ScanAsync(string tableName, string qrGuid, CancellationToken cancellationToken = default)
+    {
+        SqlIdentifier.EnsureValid(tableName, nameof(tableName));
+        if (string.IsNullOrWhiteSpace(qrGuid))
+        {
+            throw new ArgumentException("A QR-kód azonosítót meg kell adni.", nameof(qrGuid));
+        }
+
+        await using var connection = await _connectionFactory.CreateOpenConnectionAsync(cancellationToken);
+        await EnsureTableExistsAsync(connection, tableName, cancellationToken);
+
+        var updateSql = $"""
+            UPDATE {SqlIdentifier.Quote(tableName)}
+            SET {SqlIdentifier.Quote(ReservedColumnNames.LastInventoryDate)} = @Now
+            WHERE {SqlIdentifier.Quote(ReservedColumnNames.QrGuid)} = @QrGuid;
+            """;
+        await using (var updateCommand = new MySqlCommand(updateSql, connection))
+        {
+            updateCommand.Parameters.AddWithValue("@Now", DateTime.UtcNow);
+            updateCommand.Parameters.AddWithValue("@QrGuid", qrGuid);
+            var affectedRows = await updateCommand.ExecuteNonQueryAsync(cancellationToken);
+            if (affectedRows == 0)
+            {
+                return null;
+            }
+        }
+
+        var selectSql = $"SELECT * FROM {SqlIdentifier.Quote(tableName)} WHERE {SqlIdentifier.Quote(ReservedColumnNames.QrGuid)} = @QrGuid;";
+        await using var selectCommand = new MySqlCommand(selectSql, connection);
+        selectCommand.Parameters.AddWithValue("@QrGuid", qrGuid);
+        await using var reader = await selectCommand.ExecuteReaderAsync(cancellationToken);
+        return await reader.ReadAsync(cancellationToken) ? ReadRow(reader) : null;
     }
 
     private static List<string> ValidateAndFilterColumns(IEnumerable<string> requestedColumns, IReadOnlyList<ColumnInfo> validColumns)

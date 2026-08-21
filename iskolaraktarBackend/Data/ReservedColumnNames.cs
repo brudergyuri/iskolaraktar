@@ -6,6 +6,7 @@ public static class ReservedColumnNames
     public const string Id = "Id";
     public const string AssetCode = "AssetCode";
     public const string QrGuid = "QrGuid";
+    public const string LastInventoryDate = "LastInventoryDate";
 
-    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { Id, AssetCode, QrGuid };
+    public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { Id, AssetCode, QrGuid, LastInventoryDate };
 }

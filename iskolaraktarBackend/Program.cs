@@ -12,6 +12,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
 builder.Services.AddScoped<IDynamicTableRepository, DynamicTableRepository>();
+builder.Services.AddSingleton<IAuthConfigService, AuthConfigService>();
 
 var app = builder.Build();
 

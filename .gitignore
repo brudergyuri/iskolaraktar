@@ -1,5 +1,9 @@
 bin/
 obj/
+publish/
 
 # valós adatbázis-kapcsolati adatokat tartalmaz, ne kerüljön verziókezelésbe
 #iskolaraktarBackend/dbsettings.json
+
+# felhasználók és jelszóhash-ek, ne kerüljön verziókezelésbe
+auth.json
