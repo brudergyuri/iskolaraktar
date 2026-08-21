@@ -41,10 +41,6 @@ public class DynamicTableRepository : IDynamicTableRepository
     public async Task CreateTableAsync(TableDefinition table, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(table.Name, nameof(table.Name));
-        if (table.Columns.Count == 0)
-        {
-            throw new ArgumentException("Legalább egy oszlopot meg kell adni.", nameof(table));
-        }
 
         await using var connection = await _connectionFactory.CreateOpenConnectionAsync(cancellationToken);
 
@@ -53,13 +49,19 @@ public class DynamicTableRepository : IDynamicTableRepository
             throw new InvalidOperationException($"A(z) '{table.Name}' tábla már létezik.");
         }
 
-        var columnClauses = new List<string> { "`Id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY" };
+        // Id, AssetCode (eszközszám) és QrGuid minden táblában fixen létrejön, ezekre épül a QR-kódos azonosítás.
+        var columnClauses = new List<string>
+        {
+            "`Id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY",
+            "`AssetCode` VARCHAR(64) NOT NULL UNIQUE",
+            "`QrGuid` CHAR(36) NOT NULL UNIQUE",
+        };
         foreach (var column in table.Columns)
         {
             SqlIdentifier.EnsureValid(column.Name, nameof(column.Name));
-            if (string.Equals(column.Name, "Id", StringComparison.OrdinalIgnoreCase))
+            if (ReservedColumnNames.All.Contains(column.Name))
             {
-                throw new ArgumentException("Az 'Id' oszlopnév foglalt, automatikusan létrejön.", nameof(table));
+                throw new ArgumentException($"A(z) '{column.Name}' oszlopnév foglalt, automatikusan létrejön.", nameof(table));
             }
             SqlColumnType.EnsureValid(column.SqlType);
 
@@ -76,6 +78,10 @@ public class DynamicTableRepository : IDynamicTableRepository
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
         SqlIdentifier.EnsureValid(column.Name, nameof(column.Name));
+        if (ReservedColumnNames.All.Contains(column.Name))
+        {
+            throw new ArgumentException($"A(z) '{column.Name}' oszlopnév foglalt.", nameof(column));
+        }
         SqlColumnType.EnsureValid(column.SqlType);
 
         await using var connection = await _connectionFactory.CreateOpenConnectionAsync(cancellationToken);
@@ -150,6 +156,14 @@ public class DynamicTableRepository : IDynamicTableRepository
 
         await using var connection = await _connectionFactory.CreateOpenConnectionAsync(cancellationToken);
         var validColumns = await GetColumnsAsync(connection, tableName, cancellationToken);
+
+        // A QrGuid-ot mindig a szerver generálja, a kliens által küldött érték figyelmen kívül marad.
+        values.Remove(ReservedColumnNames.QrGuid);
+        if (validColumns.Any(c => string.Equals(c.Name, ReservedColumnNames.QrGuid, StringComparison.OrdinalIgnoreCase)))
+        {
+            values[ReservedColumnNames.QrGuid] = Guid.NewGuid().ToString();
+        }
+
         var columnNames = ValidateAndFilterColumns(values.Keys, validColumns);
 
         var columnList = string.Join(", ", columnNames.Select(SqlIdentifier.Quote));
@@ -169,6 +183,10 @@ public class DynamicTableRepository : IDynamicTableRepository
     public async Task<bool> UpdateAsync(string tableName, object id, Dictionary<string, object?> values, CancellationToken cancellationToken = default)
     {
         SqlIdentifier.EnsureValid(tableName, nameof(tableName));
+
+        // A QrGuid egyszer generálódik, insertkor, utána nem módosítható a kliens felől.
+        values.Remove(ReservedColumnNames.QrGuid);
+
         if (values.Count == 0)
         {
             throw new ArgumentException("Legalább egy mezőt meg kell adni.", nameof(values));
