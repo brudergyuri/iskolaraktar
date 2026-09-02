@@ -7,3 +7,8 @@ publish/
 
 # felhasználók és jelszóhash-ek, ne kerüljön verziókezelésbe
 auth.json
+
+# Visual Studio helyi/felhasználói fájlok
+.vs/
+*.user
+*.suo
