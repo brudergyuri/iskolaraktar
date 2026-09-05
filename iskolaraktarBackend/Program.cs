@@ -10,6 +10,16 @@ builder.Configuration.AddJsonFile("dbsettings.json", optional: false, reloadOnCh
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins("https://localhost:7142")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 // MySQL kapcsolatgyár: egyetlen példány az egész alkalmazás életciklusára (a kapcsolati string nem változik futás közben)
 builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
@@ -33,6 +43,7 @@ if (app.Environment.IsDevelopment())
 
 // HTTP kérések automatikus átirányítása HTTPS-re
 app.UseHttpsRedirection();
+app.UseCors("Frontend");
 
 // A [Route]/[Http*] attribútumokkal jelölt vezérlő-végpontok bekötése
 app.MapControllers();
