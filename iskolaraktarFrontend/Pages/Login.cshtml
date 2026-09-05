@@ -1,0 +1,67 @@
+﻿@page
+@model iskolaraktarFrontend.Pages.LoginModel
+
+@{
+    ViewData["Title"] = "Bejelentkezés";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+}
+
+<div class="login-container">
+    <div class="login-card">
+
+        <div class="login-header">
+            <h1 class="login-title">Bejelentkezés</h1>
+            <p class="login-subtitle">
+                Jelentkezz be az Iskolai Raktár rendszerbe
+            </p>
+        </div>
+
+        <form id="loginForm">
+
+            <div class="login-form-group">
+                <label for="username" class="login-label">
+                    Felhasználónév
+                </label>
+
+                <input type="text"
+                       id="username"
+                       name="username"
+                       class="form-control"
+                       autocomplete="username"
+                       required />
+            </div>
+
+            <div class="login-form-group">
+                <label for="password" class="login-label">
+                    Jelszó
+                </label>
+
+                <input type="password"
+                       id="password"
+                       name="password"
+                       class="form-control"
+                       autocomplete="current-password"
+                       required />
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary login-button">
+                Bejelentkezés
+            </button>
+
+            <div id="loginError"
+                 class="alert alert-danger login-error"
+                 role="alert">
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/controllers/login-controller.js"></script>
+}

@@ -1,0 +1,54 @@
+﻿/* Bejelentkezési oldal */
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 65vh;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+    color: var(--muted-text-color);
+    margin-bottom: 0;
+}
+
+.login-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.login-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.login-button {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.login-error {
+    display: none;
+    margin-top: 1rem;
+}

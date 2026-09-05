@@ -1,0 +1,27 @@
+﻿/* Közös oldalelrendezés: navigáció és lábléc */
+
+.navbar {
+    background-color: var(--surface-color) !important;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+    .navbar-brand:hover {
+        color: var(--primary-color);
+    }
+
+.navbar .nav-link {
+    color: var(--muted-text-color) !important;
+}
+
+    .navbar .nav-link:hover {
+        color: var(--primary-color) !important;
+    }
+
+footer {
+    background-color: var(--surface-color);
+    padding: 16px 0;
+}

@@ -1,10 +1,54 @@
 ﻿@page
 @model IndexModel
+
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Kezdőlap";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+}
+
+<div class="home-header">
+    <h1 class="home-title">Iskolai Raktár</h1>
+    <p class="home-subtitle">
+        Iskolai leltár- és raktárkezelő rendszer
+    </p>
+</div>
+
+<div class="row g-4">
+
+    <div class="col-md-4">
+        <div class="card feature-card">
+            <div class="card-body">
+                <h2 class="feature-card-title">Leltár kezelése</h2>
+                <p class="feature-card-text">
+                    Leltári tételek megtekintése, hozzáadása és módosítása.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card feature-card">
+            <div class="card-body">
+                <h2 class="feature-card-title">Leltárkörzetek</h2>
+                <p class="feature-card-text">
+                    Az egyes leltárkörzetek és a hozzájuk tartozó eszközök kezelése.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card feature-card">
+            <div class="card-body">
+                <h2 class="feature-card-title">Felhasználók</h2>
+                <p class="feature-card-text">
+                    Felhasználók és jogosultságok kezelése az adminisztrátorok számára.
+                </p>
+            </div>
+        </div>
+    </div>
+
 </div>
