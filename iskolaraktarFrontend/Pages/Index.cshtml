@@ -18,37 +18,46 @@
 
 <div class="row g-4">
 
-    <div class="col-md-4">
-        <div class="card feature-card">
-            <div class="card-body">
-                <h2 class="feature-card-title">Leltár kezelése</h2>
-                <p class="feature-card-text">
-                    Leltári tételek megtekintése, hozzáadása és módosítása.
-                </p>
+    <div class="col-md-6">
+        <a asp-page="/Leltar"
+           class="text-decoration-none text-reset">
+
+            <div class="card feature-card">
+                <div class="card-body">
+
+                    <h2 class="feature-card-title">
+                        Leltárkörzetek
+                    </h2>
+
+                    <p class="feature-card-text">
+                        Leltárkörzetek megtekintése és a hozzájuk tartozó eszközök kezelése.
+                    </p>
+
+                </div>
             </div>
-        </div>
+
+        </a>
     </div>
 
-    <div class="col-md-4">
-        <div class="card feature-card">
-            <div class="card-body">
-                <h2 class="feature-card-title">Leltárkörzetek</h2>
-                <p class="feature-card-text">
-                    Az egyes leltárkörzetek és a hozzájuk tartozó eszközök kezelése.
-                </p>
-            </div>
-        </div>
-    </div>
+    <div class="col-md-6">
+        <a asp-page="/Admin"
+           class="text-decoration-none text-reset">
 
-    <div class="col-md-4">
-        <div class="card feature-card">
-            <div class="card-body">
-                <h2 class="feature-card-title">Felhasználók</h2>
-                <p class="feature-card-text">
-                    Felhasználók és jogosultságok kezelése az adminisztrátorok számára.
-                </p>
+            <div class="card feature-card">
+                <div class="card-body">
+
+                    <h2 class="feature-card-title">
+                        Felhasználó / Leltárkörzet módosítás
+                    </h2>
+
+                    <p class="feature-card-text">
+                        Felhasználók, jogosultságok és leltárkörzetek adminisztrációja.
+                    </p>
+
+                </div>
             </div>
-        </div>
+
+        </a>
     </div>
 
 </div>

@@ -1,0 +1,208 @@
+﻿@page
+@model iskolaraktarFrontend.Pages.AdminModel
+
+@{
+    ViewData["Title"] = "Adminisztráció";
+}
+
+<div class="mb-4">
+    <h1>Adminisztráció</h1>
+    <p class="text-muted">
+        Felhasználók, jogosultságok és leltárkörzetek kezelése.
+    </p>
+</div>
+
+<div id="adminError"
+     class="alert alert-danger d-none"
+     role="alert">
+</div>
+
+<div id="adminSuccess"
+     class="alert alert-success d-none"
+     role="alert">
+</div>
+
+<div class="row g-4">
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <h2 class="h4 mb-3">
+                    Felhasználók kezelése
+                </h2>
+
+                <form id="userForm">
+
+                    <div class="mb-3">
+                        <label for="newUsername"
+                               class="form-label">
+                            Felhasználónév
+                        </label>
+
+                        <input type="text"
+                               id="newUsername"
+                               class="form-control"
+                               required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newPassword"
+                               class="form-label">
+                            Jelszó
+                        </label>
+
+                        <input type="password"
+                               id="newPassword"
+                               class="form-control"
+                               required />
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox"
+                               id="newUserIsAdmin"
+                               class="form-check-input" />
+
+                        <label for="newUserIsAdmin"
+                               class="form-check-label">
+                            Adminisztrátor
+                        </label>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Felhasználó hozzáadása
+                    </button>
+
+                </form>
+
+                <hr class="my-4" />
+
+                <h3 class="h5 mb-3">
+                    Felhasználók
+                </h3>
+
+                <div class="table-responsive">
+                    <table id="usersTable"
+                           class="table table-striped table-bordered">
+
+                        <thead>
+                            <tr>
+                                <th>Felhasználónév</th>
+                                <th>Admin</th>
+                                <th>Műveletek</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="usersTableBody">
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <h2 class="h4 mb-3">
+                    Leltárkörzetek kezelése
+                </h2>
+
+                <form id="tableForm">
+
+                    <div class="mb-3">
+                        <label for="newTableName"
+                               class="form-label">
+                            Leltárkörzet neve
+                        </label>
+
+                        <input type="text"
+                               id="newTableName"
+                               class="form-control"
+                               required />
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Leltárkörzet létrehozása
+                    </button>
+
+                </form>
+
+                <hr class="my-4" />
+
+                <h3 class="h5 mb-3">
+                    Leltárkörzetek
+                </h3>
+
+                <div class="table-responsive">
+                    <table id="adminTablesTable"
+                           class="table table-striped table-bordered">
+
+                        <thead>
+                            <tr>
+                                <th>Név</th>
+                                <th>Műveletek</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="adminTablesTableBody">
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="card mt-4 d-none"
+     id="permissionPanel">
+
+    <div class="card-body">
+
+        <h2 class="h4 mb-3">
+            Jogosultságok kezelése
+        </h2>
+
+        <p class="text-muted">
+            Kiválasztott felhasználó:
+            <strong id="permissionUsername"></strong>
+        </p>
+
+        <div class="table-responsive">
+            <table class="table table-bordered">
+
+                <thead>
+                    <tr>
+                        <th>Leltárkörzet</th>
+                        <th>Hozzáférés</th>
+                    </tr>
+                </thead>
+
+                <tbody id="permissionsTableBody">
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script type="module"
+            src="~/js/controllers/admin-controller.js"
+            asp-append-version="true">
+    </script>
+}
