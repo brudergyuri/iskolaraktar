@@ -1,5 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// önaláírt tanúsítvány elérési útja/jelszava, hogy publikálás után is cserélhető legyen külön fájlból
+builder.Configuration.AddJsonFile("certsettings.json", optional: false, reloadOnChange: true);
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 

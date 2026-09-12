@@ -5,6 +5,12 @@ publish/
 # valós adatbázis-kapcsolati adatokat tartalmaz, ne kerüljön verziókezelésbe
 #iskolaraktarBackend/dbsettings.json
 
+# önaláírt tanúsítvány jelszava / privát kulcsa, ne kerüljön verziókezelésbe
+#iskolaraktarBackend/certsettings.json
+#iskolaraktarFrontend/certsettings.json
+#iskolaraktarBackend/certs/
+#iskolaraktarFrontend/certs/
+
 # felhasználók és jelszóhash-ek, ne kerüljön verziókezelésbe
 auth.json
 

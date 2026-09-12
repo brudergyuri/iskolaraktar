@@ -1,0 +1,10 @@
+{
+  "Kestrel": {
+    "Certificates": {
+      "Default": {
+        "Path": "certs/iskolaraktar.pfx",
+        "Password": "iskolaraktar"
+      }
+    }
+  }
+}

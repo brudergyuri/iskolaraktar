@@ -5,6 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // külön fájlban, hogy publikálás után is szerkeszthető legyen szövegszerkesztővel (nem kell újrafordítás a kapcsolati adatok módosításához)
 builder.Configuration.AddJsonFile("dbsettings.json", optional: false, reloadOnChange: true);
+// önaláírt tanúsítvány elérési útja/jelszava, hogy publikálás után is cserélhető legyen külön fájlból
+builder.Configuration.AddJsonFile("certsettings.json", optional: false, reloadOnChange: true);
 
 // MVC vezérlők (Controllers mappa) és a Swagger/OpenAPI leíró generálásának bekapcsolása
 builder.Services.AddControllers();
