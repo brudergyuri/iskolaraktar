@@ -32,6 +32,12 @@ export class AdminController {
         this.permissionsTableBody =
             document.getElementById("permissionsTableBody");
 
+        this.qrSettingsForm =
+            document.getElementById("qrSettingsForm");
+
+        this.qrBaseUrl =
+            document.getElementById("qrBaseUrl");
+
         this.users = [];
         this.tables = [];
         this.selectedUsername = null;
@@ -59,7 +65,15 @@ export class AdminController {
             this.handleCreateTable(event);
         });
 
+        this.qrSettingsForm?.addEventListener(
+            "submit",
+            (event) => {
+                this.handleQrSettingsUpdate(event);
+            }
+        );
+
         await this.loadData();
+        await this.loadQrSettings();
     }
 
     async loadData() {
@@ -79,6 +93,21 @@ export class AdminController {
 
             if (this.selectedUsername) {
                 this.renderPermissions(this.selectedUsername);
+            }
+        }
+        catch (error) {
+            this.showError(error.message);
+        }
+    }
+
+    async loadQrSettings() {
+        try {
+            const settings =
+                await this.adminService.getQrSettings();
+
+            if (this.qrBaseUrl) {
+                this.qrBaseUrl.value =
+                    settings.baseUrl ?? "";
             }
         }
         catch (error) {
@@ -471,6 +500,42 @@ export class AdminController {
         }
     }
 
+    async handleQrSettingsUpdate(event) {
+        event.preventDefault();
+
+        this.hideError();
+        this.hideSuccess();
+
+        const baseUrl =
+            this.qrBaseUrl?.value.trim() ?? "";
+
+        if (!baseUrl) {
+            this.showError(
+                "A QR szervercím nem lehet üres."
+            );
+            return;
+        }
+
+        try {
+            const settings =
+                await this.adminService.updateQrSettings(
+                    baseUrl
+                );
+
+            if (this.qrBaseUrl) {
+                this.qrBaseUrl.value =
+                    settings.baseUrl ?? "";
+            }
+
+            this.showSuccess(
+                "A QR-beállítás sikeresen módosításra került."
+            );
+        }
+        catch (error) {
+            this.showError(error.message);
+        }
+    }
+
     hidePermissionPanel() {
         this.permissionPanel?.classList.add(
             "d-none"
@@ -523,7 +588,7 @@ export class AdminController {
 }
 
 const adminService =
-    new AdminService("https://localhost:7273");
+    new AdminService("");
 
 const sessionService =
     new SessionService();

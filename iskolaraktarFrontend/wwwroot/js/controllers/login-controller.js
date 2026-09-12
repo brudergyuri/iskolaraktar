@@ -31,7 +31,10 @@ export class LoginController {
         const password = this.passwordInput.value;
 
         try {
-            const user = await this.authService.login(username, password);
+            const user = await this.authService.login(
+                username,
+                password
+            );
 
             sessionStorage.setItem(
                 "currentUser",
@@ -64,13 +67,18 @@ export class LoginController {
         }
 
         this.submitButton.disabled = isLoading;
-        this.submitButton.textContent = isLoading
-            ? "Bejelentkezés..."
-            : "Bejelentkezés";
+
+        this.submitButton.textContent =
+            isLoading
+                ? "Bejelentkezés..."
+                : "Bejelentkezés";
     }
 }
 
-const authService = new AuthService("https://localhost:7273");
-const loginController = new LoginController(authService);
+const authService =
+    new AuthService("");
+
+const loginController =
+    new LoginController(authService);
 
 loginController.init();

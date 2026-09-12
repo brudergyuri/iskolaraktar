@@ -153,4 +153,41 @@ export class AdminService {
             );
         }
     }
+
+    async getQrSettings() {
+        const response = await this.apiService.get(
+            "/api/qr-settings"
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+
+            throw new Error(
+                errorText ||
+                "Nem sikerült lekérni a QR-beállításokat."
+            );
+        }
+
+        return await response.json();
+    }
+
+    async updateQrSettings(baseUrl) {
+        const response = await this.apiService.put(
+            "/api/qr-settings",
+            {
+                baseUrl
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+
+            throw new Error(
+                errorText ||
+                "Nem sikerült módosítani a QR-beállításokat."
+            );
+        }
+
+        return await response.json();
+    }
 }

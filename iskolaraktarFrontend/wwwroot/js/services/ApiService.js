@@ -1,10 +1,9 @@
 ﻿export class ApiService {
-    constructor(baseUrl) {
-        this.baseUrl = baseUrl;
+    constructor() {
     }
 
     async request(endpoint, options = {}) {
-        const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        const response = await fetch(endpoint, {
             ...options,
             headers: {
                 "Content-Type": "application/json",

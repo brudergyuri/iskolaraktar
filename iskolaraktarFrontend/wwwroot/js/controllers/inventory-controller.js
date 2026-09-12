@@ -2,9 +2,14 @@
 import { SessionService } from "../services/SessionService.js";
 
 export class InventoryController {
-    constructor(inventoryService, sessionService) {
+    constructor(
+        inventoryService,
+        sessionService,
+        backendBaseUrl
+    ) {
         this.inventoryService = inventoryService;
         this.sessionService = sessionService;
+        this.backendBaseUrl = backendBaseUrl;
 
         this.tableSelect = document.getElementById("tableSelect");
         this.errorElement = document.getElementById("inventoryError");
@@ -385,6 +390,10 @@ export class InventoryController {
             headerRow.appendChild(headerCell);
         });
 
+        const qrHeader = document.createElement("th");
+        qrHeader.textContent = "QR-kód";
+        headerRow.appendChild(qrHeader);
+
         if (canWrite) {
             const actionsHeader = document.createElement("th");
 
@@ -400,7 +409,7 @@ export class InventoryController {
             const cell = document.createElement("td");
 
             cell.colSpan =
-                columns.length + (canWrite ? 1 : 0);
+                columns.length + 1 + (canWrite ? 1 : 0);
 
             cell.textContent =
                 "Ebben a leltárkörzetben még nincs egyetlen tétel sem.";
@@ -430,6 +439,41 @@ export class InventoryController {
 
                     row.appendChild(cell);
                 });
+
+                const qrCell =
+                    document.createElement("td");
+
+                qrCell.classList.add("text-nowrap");
+
+                const qrButton =
+                    document.createElement("button");
+
+                qrButton.type = "button";
+
+                qrButton.classList.add(
+                    "btn",
+                    "btn-sm",
+                    "btn-outline-secondary"
+                );
+
+                qrButton.textContent = "QR-kód";
+
+                if (!item.QrGuid) {
+                    qrButton.disabled = true;
+                    qrButton.title =
+                        "Ehhez a tételhez nincs QR-azonosító.";
+                }
+                else {
+                    qrButton.addEventListener(
+                        "click",
+                        () => {
+                            this.openQrCode(item.QrGuid);
+                        }
+                    );
+                }
+
+                qrCell.appendChild(qrButton);
+                row.appendChild(qrCell);
 
                 if (canWrite) {
                     const actionsCell =
@@ -491,6 +535,27 @@ export class InventoryController {
         }
 
         this.inventoryTable.classList.remove("d-none");
+    }
+
+    openQrCode(qrGuid) {
+        if (!qrGuid) {
+            this.showError(
+                "Ehhez a leltári tételhez nincs QR-azonosító."
+            );
+            return;
+        }
+
+        const encodedQrGuid =
+            encodeURIComponent(qrGuid);
+
+        const qrUrl =
+            `${this.backendBaseUrl}/api/qr/${encodedQrGuid}.png`;
+
+        window.open(
+            qrUrl,
+            "_blank",
+            "noopener,noreferrer"
+        );
     }
 
     startEdit(item) {
@@ -674,8 +739,10 @@ export class InventoryController {
     }
 }
 
+const backendBaseUrl = "";
+    
 const inventoryService =
-    new InventoryService("https://localhost:7273");
+    new InventoryService(backendBaseUrl);
 
 const sessionService =
     new SessionService();
@@ -683,7 +750,8 @@ const sessionService =
 const inventoryController =
     new InventoryController(
         inventoryService,
-        sessionService
+        sessionService,
+        backendBaseUrl
     );
 
 inventoryController.init();

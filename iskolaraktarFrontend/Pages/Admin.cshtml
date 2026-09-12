@@ -166,6 +166,49 @@
 
 </div>
 
+<div class="card mt-4">
+    <div class="card-body">
+
+        <h2 class="h4 mb-3">
+            QR-kód beállítások
+        </h2>
+
+        <p class="text-muted">
+            Ez a cím kerül a létrehozott QR-kódokba.
+            A QR-kód az adott eszköz egyedi azonosítójával egészíti ki ezt a címet.
+        </p>
+
+        <form id="qrSettingsForm">
+
+            <div class="mb-3">
+                <label for="qrBaseUrl"
+                       class="form-label">
+                    Szerver címe
+                </label>
+
+                <input type="text"
+                       id="qrBaseUrl"
+                       class="form-control"
+                       placeholder="https://szerver.raktar.com"
+                       required />
+
+                <div class="form-text">
+                    Példa:
+                    https://szerver.raktar.com
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary"
+                    id="saveQrSettingsButton">
+                QR-beállítás mentése
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
 <div class="card mt-4 d-none"
      id="permissionPanel">
 
