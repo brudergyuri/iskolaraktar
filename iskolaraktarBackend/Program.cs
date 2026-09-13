@@ -85,20 +85,19 @@ var startupInitializer =
 await startupInitializer.InitializeAsync();
 
 // Swagger fejlesztői környezetben
-if (app.Environment.IsDevelopment())
+
+app.UseSwagger();
+
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
+    options.SwaggerEndpoint(
+        "/swagger/v1/swagger.json",
+        "Iskolaraktár API v1"
+    );
 
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint(
-            "/swagger/v1/swagger.json",
-            "Iskolaraktár API v1"
-        );
+    options.RoutePrefix = string.Empty;
+});
 
-        options.RoutePrefix = string.Empty;
-    });
-}
 
 // Dev Tunnel / frontend proxy miatt nincs szükség
 // automatikus localhost HTTPS átirányításra.
